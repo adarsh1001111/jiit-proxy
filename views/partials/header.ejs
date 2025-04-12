@@ -14,11 +14,11 @@
               clip-rule="evenodd"
             ></path>
           </svg>
-          <span class="ml-2 text-xl font-bold text-gray-800">JIIT Proxy</span>
+          <span class="ml-2 text-xl font-bold text-gray-800">JProxy</span>
         </a>
       </div>
 
-      <% if(user) { %>
+      <% if(typeof user !== 'undefined' && user) { %>
       <nav class="hidden md:flex space-x-6">
         <a
           href="/dashboard"
@@ -40,13 +40,21 @@
           class="text-gray-600 hover:text-blue-600 transition duration-150"
           >Profile</a
         >
+        <% if(user.isAdmin) { %>
+        <a
+          href="/admin/dashboard"
+          class="text-red-600 hover:text-red-800 transition duration-150"
+          >Admin</a
+        >
+        <% } %>
       </nav>
 
       <div class="flex items-center">
         <div class="mr-4 hidden md:block">
           <span class="text-sm text-gray-500">Balance:</span>
           <span class="text-sm font-bold text-green-600"
-            >₹<%= user.walletBalance.toFixed(2) %></span
+            >₹<%= user.walletBalance ? user.walletBalance.toFixed(2) : '0.00'
+            %></span
           >
         </div>
 
@@ -69,6 +77,7 @@
             x-show="open"
             @click.away="open = false"
             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10"
+            style="display: none"
           >
             <a
               href="/profile"
@@ -119,7 +128,7 @@
       <div class="flex space-x-4">
         <a
           href="/auth/login"
-          class="text-blue-600 hover:text-blue-800 font-medium"
+          class="text-blue-600 hover:text-blue-800 font-medium px-4 py-2"
           >Login</a
         >
         <a
@@ -133,7 +142,12 @@
   </div>
 
   <!-- Mobile Menu -->
-  <div class="md:hidden" x-show="mobileMenu" @click.away="mobileMenu = false">
+  <div
+    class="md:hidden"
+    x-show="mobileMenu"
+    @click.away="mobileMenu = false"
+    style="display: none"
+  >
     <div class="container mx-auto px-4 py-2 border-t border-gray-200">
       <nav class="flex flex-col space-y-2">
         <a
@@ -156,6 +170,13 @@
           class="text-gray-600 hover:text-blue-600 py-2 transition duration-150"
           >Profile</a
         >
+        <% if(typeof user !== 'undefined' && user && user.isAdmin) { %>
+        <a
+          href="/admin/dashboard"
+          class="text-red-600 hover:text-red-800 py-2 transition duration-150"
+          >Admin Dashboard</a
+        >
+        <% } %>
         <div class="border-t border-gray-200 my-1"></div>
         <a
           href="/auth/logout"

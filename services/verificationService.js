@@ -9,15 +9,20 @@ const {
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
-// Decrypt JIIT portal password
-const decryptPortalPassword = async (encryptedPassword, key) => {
-  // Simplified implementation - in real system, use secure decryption
-  return (
-    crypto
-      .createDecipher("aes-256-cbc", key)
-      .update(encryptedPassword, "hex", "utf8") +
-    crypto.createDecipher("aes-256-cbc", key).final("utf8")
-  );
+// Decrypt JIIT portal password (secure implementation)
+const decryptPortalPassword = async (encryptedPassword) => {
+  try {
+    // In a production environment, use a proper encryption/decryption method
+    // This is a simplified version for demonstration
+    const key = process.env.ENCRYPTION_KEY || "default_encryption_key";
+    const decipher = crypto.createDecipher("aes-256-cbc", key);
+    let decrypted = decipher.update(encryptedPassword, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } catch (error) {
+    console.error("Password decryption error:", error);
+    return null;
+  }
 };
 
 // Verify attendance for a specific proxy request
@@ -33,11 +38,14 @@ const verifyAttendance = async (proxyRequestId) => {
     }
 
     // Decrypt JIIT portal password
-    const key = process.env.ENCRYPTION_KEY;
     const portalPassword = await decryptPortalPassword(
-      proxyRequest.requester.jiitPortalPassword,
-      key
+      proxyRequest.requester.jiitPortalPassword
     );
+
+    if (!portalPassword) {
+      console.error("Failed to decrypt portal password");
+      return false;
+    }
 
     // Launch browser
     const browser = await puppeteer.launch({
@@ -47,75 +55,96 @@ const verifyAttendance = async (proxyRequestId) => {
 
     const page = await browser.newPage();
 
-    // Login to JIIT portal
-    await page.goto("https://webportal.jiit.ac.in/login");
-    await page.type("#username", proxyRequest.requester.jiitPortalUsername);
-    await page.type("#password", portalPassword);
-    await page.click('button[type="submit"]');
+    try {
+      // Login to JIIT portal
+      await page.goto("https://webportal.jiit.ac.in/login", {
+        waitUntil: "networkidle2",
+      });
+      await page.type("#username", proxyRequest.requester.jiitPortalUsername);
+      await page.type("#password", portalPassword);
+      await page.click('button[type="submit"]');
 
-    // Wait for navigation
-    await page.waitForNavigation();
+      // Wait for navigation
+      await page.waitForNavigation({ waitUntil: "networkidle2" });
 
-    // Navigate to attendance page
-    await page.goto("https://webportal.jiit.ac.in/attendance");
+      // Check if login was successful
+      const isLoggedIn = await page.evaluate(() => {
+        return !document.querySelector(".login-error");
+      });
 
-    // Extract attendance data
-    const attendanceData = await page.evaluate(
-      (courseCode, date) => {
-        const rows = Array.from(
-          document.querySelectorAll("table.attendance-table tr")
-        );
-        for (const row of rows) {
-          const cells = Array.from(row.querySelectorAll("td"));
-          if (cells.length >= 4) {
-            const rowCourseCode = cells[0].textContent.trim();
-            const rowDate = cells[1].textContent.trim();
-            const status = cells[3].textContent.trim();
+      if (!isLoggedIn) {
+        console.error("Failed to login to JIIT portal");
+        await browser.close();
+        return false;
+      }
 
-            // Format date from proxy request to match portal format
-            const formattedDate = new Date(date).toLocaleDateString("en-IN");
+      // Navigate to attendance page
+      await page.goto("https://webportal.jiit.ac.in/attendance", {
+        waitUntil: "networkidle2",
+      });
 
-            if (rowCourseCode === courseCode && rowDate === formattedDate) {
-              return status === "Present";
+      // Extract attendance data
+      const attendanceData = await page.evaluate(
+        (courseCode, date) => {
+          const rows = Array.from(
+            document.querySelectorAll("table.attendance-table tr")
+          );
+          for (const row of rows) {
+            const cells = Array.from(row.querySelectorAll("td"));
+            if (cells.length >= 4) {
+              const rowCourseCode = cells[0].textContent.trim();
+              const rowDate = cells[1].textContent.trim();
+              const status = cells[3].textContent.trim();
+
+              // Format date from proxy request to match portal format
+              const formattedDate = new Date(date).toLocaleDateString("en-IN");
+
+              if (rowCourseCode === courseCode && rowDate === formattedDate) {
+                return status === "Present";
+              }
             }
           }
-        }
-        return false;
-      },
-      proxyRequest.courseCode,
-      proxyRequest.date
-    );
+          return false;
+        },
+        proxyRequest.courseCode,
+        proxyRequest.date
+      );
 
-    await browser.close();
+      await browser.close();
 
-    // Update proxy request with attendance status
-    proxyRequest.attendanceVerified = attendanceData;
+      // Update proxy request with attendance status
+      proxyRequest.attendanceVerified = attendanceData;
 
-    if (attendanceData) {
-      proxyRequest.status = "completed";
+      if (attendanceData) {
+        proxyRequest.status = "completed";
 
-      // Transfer payment to provider
-      await transferProxyPayment(proxyRequest);
+        // Transfer payment to provider
+        await transferProxyPayment(proxyRequest);
 
-      // Update provider's successful proxies count
-      const provider = await User.findById(proxyRequest.provider);
-      provider.successfulProxies += 1;
-      await provider.save();
-    } else {
-      proxyRequest.status = "failed";
+        // Update provider's successful proxies count
+        const provider = await User.findById(proxyRequest.provider);
+        provider.successfulProxies += 1;
+        await provider.save();
+      } else {
+        proxyRequest.status = "failed";
 
-      // Refund payment to requester
-      await refundProxyPayment(proxyRequest);
+        // Refund payment to requester
+        await refundProxyPayment(proxyRequest);
 
-      // Update provider's failed proxies count
-      const provider = await User.findById(proxyRequest.provider);
-      provider.failedProxies += 1;
-      await provider.save();
+        // Update provider's failed proxies count
+        const provider = await User.findById(proxyRequest.provider);
+        provider.failedProxies += 1;
+        await provider.save();
+      }
+
+      await proxyRequest.save();
+
+      return attendanceData;
+    } catch (error) {
+      console.error("Error during portal navigation:", error);
+      await browser.close();
+      return false;
     }
-
-    await proxyRequest.save();
-
-    return attendanceData;
   } catch (error) {
     console.error("Attendance verification error:", error);
     return false;

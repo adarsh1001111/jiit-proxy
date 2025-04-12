@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const ProxyRequestSchema = new mongoose.Schema({
   requester: {
@@ -59,4 +59,4 @@ const ProxyRequestSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("ProxyRequest", ProxyRequestSchema);
+export default mongoose.model("ProxyRequest", ProxyRequestSchema);

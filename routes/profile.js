@@ -1,8 +1,9 @@
-const express = require("express");
+import express from "express";
+import { isAuthenticated } from "../middlewares/auth.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+
 const router = express.Router();
-const { isAuthenticated } = require("../middlewares/auth");
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
 
 // User profile page
 router.get("/", isAuthenticated, (req, res) => {
@@ -83,4 +84,4 @@ router.post("/change-password", isAuthenticated, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

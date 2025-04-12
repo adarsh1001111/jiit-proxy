@@ -1,9 +1,9 @@
-const User = require("../models/User");
-const Payment = require("../models/Payment");
-const { generateTransactionId } = require("../utils/helpers");
+import User from "../models/User.js";
+import Payment from "../models/Payment.js";
+import { generateTransactionId } from "../utils/helpers.js";
 
 // Add funds to user wallet
-const addFundsToWallet = async (
+export const addFundsToWallet = async (
   userId,
   amount,
   paymentMethod,
@@ -41,7 +41,11 @@ const addFundsToWallet = async (
 };
 
 // Withdraw funds from user wallet
-const withdrawFundsFromWallet = async (userId, amount, paymentMethod) => {
+export const withdrawFundsFromWallet = async (
+  userId,
+  amount,
+  paymentMethod
+) => {
   try {
     // Find user
     const user = await User.findById(userId);
@@ -82,7 +86,7 @@ const withdrawFundsFromWallet = async (userId, amount, paymentMethod) => {
 };
 
 // Process payment for proxy request
-const processProxyPayment = async (userId, amount, transactionId) => {
+export const processProxyPayment = async (userId, amount, transactionId) => {
   try {
     // Find user
     const user = await User.findById(userId);
@@ -120,7 +124,7 @@ const processProxyPayment = async (userId, amount, transactionId) => {
 };
 
 // Transfer payment to proxy provider
-const transferProxyPayment = async (proxyRequest) => {
+export const transferProxyPayment = async (proxyRequest) => {
   try {
     // Find provider
     const provider = await User.findById(proxyRequest.provider);
@@ -157,7 +161,7 @@ const transferProxyPayment = async (proxyRequest) => {
 };
 
 // Refund proxy payment to requester
-const refundProxyPayment = async (proxyRequest) => {
+export const refundProxyPayment = async (proxyRequest) => {
   try {
     // Find requester
     const requester = await User.findById(proxyRequest.requester);
@@ -191,12 +195,4 @@ const refundProxyPayment = async (proxyRequest) => {
     console.error("Error refunding proxy payment:", error);
     return { success: false, message: "Failed to refund payment" };
   }
-};
-
-module.exports = {
-  addFundsToWallet,
-  withdrawFundsFromWallet,
-  processProxyPayment,
-  transferProxyPayment,
-  refundProxyPayment,
 };

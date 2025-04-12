@@ -1,45 +1,57 @@
 // Required modules
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const session = require("express-session");
-const passport = require("passport");
-const flash = require("connect-flash");
-const path = require("path");
-require("dotenv").config();
+import express from "express";
+import mongoose from "mongoose";
+import session from "express-session";
+import passport from "passport";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import "dotenv/config";
+import flash from "connect-flash";
+
+// Get directory paths for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Import routes
+import indexRouter from "./routes/index.js";
+import authRouter from "./routes/auth.js";
+import proxyRouter from "./routes/proxy.js";
+import profileRouter from "./routes/profile.js";
+import adminRouter from "./routes/admin.js";
+import paymentRouter from "./routes/payment.js";
+import verificationRouter from "./routes/verification.js";
+
+// Import passport config
+import configurePassport from "./config/passport.js";
 
 // Initialize app
 const app = express();
-const expressLayouts = require("express-ejs-layouts");
 
-app.set("view engine", "ejs");
-app.use(expressLayouts); // Use layouts
-app.set("layout", "layouts/main"); // Default layout
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(join(__dirname, "public")));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === "production" },
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    },
   })
 );
 app.use(flash());
 
-// Passport configuration
-require("./config/passport")(passport);
+// Configure passport
+configurePassport(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -54,20 +66,16 @@ app.use((req, res, next) => {
 
 // Set view engine
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", join(__dirname, "views"));
 
 // Routes
-app.use("/", require("./routes/index"));
-app.use("/auth", require("./routes/auth"));
-app.use("/proxy", require("./routes/proxy"));
-app.use("/profile", require("./routes/profile"));
-app.use("/admin", require("./routes/admin"));
-app.use("/payment", require("./routes/payment"));
-app.use("/verification", require("./routes/verification"));
-
-// Initialize scheduled jobs
-const { initializeJobs } = require("./jobs/scheduledJobs");
-initializeJobs();
+app.use("/", indexRouter);
+app.use("/auth", authRouter);
+app.use("/proxy", proxyRouter);
+app.use("/profile", profileRouter);
+app.use("/admin", adminRouter);
+app.use("/payment", paymentRouter);
+app.use("/verification", verificationRouter);
 
 // Error handling
 app.use((req, res, next) => {

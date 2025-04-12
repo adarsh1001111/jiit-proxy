@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -10,7 +11,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: /^[a-zA-Z0-9._%+-]+@jiit\.ac\.in$/,
+    match: /^[a-zA-Z0-9._%+-]+@(jiit\.ac\.in|mail\.jiit\.ac\.in)$/,
   },
   password: {
     type: String,
@@ -63,20 +64,30 @@ const UserSchema = new mongoose.Schema({
 
 // Password hash middleware
 UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    return next();
-  }
-
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    // Hash app password if modified
+    if (this.isModified("password")) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
 
-    // Encrypt JIIT portal password for security
-    const portalSalt = await bcrypt.genSalt(10);
-    this.jiitPortalPassword = await bcrypt.hash(
-      this.jiitPortalPassword,
-      portalSalt
-    );
+    // Encrypt JIIT portal password if modified
+    if (this.isModified("jiitPortalPassword")) {
+      // Use symmetric encryption instead of hashing to allow decryption later
+      const key = process.env.ENCRYPTION_KEY || "default_key_for_development";
+      const cipher = crypto.createCipheriv(
+        "aes-256-cbc",
+        crypto
+          .createHash("sha256")
+          .update(key)
+          .digest("base64")
+          .substring(0, 32),
+        Buffer.from("0000000000000000")
+      ); // IV should be unique in production
+      let encrypted = cipher.update(this.jiitPortalPassword, "utf8", "hex");
+      encrypted += cipher.final("hex");
+      this.jiitPortalPassword = encrypted;
+    }
 
     next();
   } catch (err) {
@@ -84,9 +95,29 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
+// Method to decrypt portal password
+UserSchema.methods.getDecryptedPortalPassword = function () {
+  try {
+    const key = process.env.ENCRYPTION_KEY || "default_key_for_development";
+    const decipher = crypto.createDecipheriv(
+      "aes-256-cbc",
+      crypto.createHash("sha256").update(key).digest("base64").substring(0, 32),
+      Buffer.from("0000000000000000")
+    );
+    let decrypted = decipher.update(this.jiitPortalPassword, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } catch (error) {
+    console.error("Password decryption error:", error);
+    return null;
+  }
+};
+
 // Method to validate password
 UserSchema.methods.validatePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+
+export default mongoose.model("User", UserSchema);

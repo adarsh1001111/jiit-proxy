@@ -1,8 +1,8 @@
-const User = require("../models/User");
-const ProxyRequest = require("../models/ProxyRequest");
+import User from "../models/User.js";
+import ProxyRequest from "../models/ProxyRequest.js";
 
 // Render dashboard page
-const renderDashboard = async (req, res) => {
+export const renderDashboard = async (req, res) => {
   try {
     // Get requested proxies (as requester)
     const requestedProxies = await ProxyRequest.find({
@@ -70,8 +70,4 @@ const renderDashboard = async (req, res) => {
       topProviders: [],
     });
   }
-};
-
-module.exports = {
-  renderDashboard,
 };

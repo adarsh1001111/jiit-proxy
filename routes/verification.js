@@ -1,8 +1,9 @@
-const express = require("express");
+import express from "express";
+import { isAuthenticated } from "../middlewares/auth.js";
+import ProxyRequest from "../models/ProxyRequest.js";
+import { verifyAttendance } from "../services/verificationService.js";
+
 const router = express.Router();
-const { isAuthenticated } = require("../middlewares/auth");
-const ProxyRequest = require("../models/ProxyRequest");
-const { verifyAttendance } = require("../services/verificationService");
 
 // Manually verify attendance for a proxy request (mostly for testing)
 router.post("/manual/:id", isAuthenticated, async (req, res) => {
@@ -91,16 +92,15 @@ router.post("/trigger-all", isAuthenticated, async (req, res) => {
       return res.redirect("/dashboard");
     }
 
-    const {
-      scheduleVerifications,
-    } = require("../services/verificationService");
-    await scheduleVerifications();
+    import("../services/verificationService.js").then(async (module) => {
+      await module.scheduleVerifications();
 
-    req.flash(
-      "success_msg",
-      "Verification process triggered for all pending proxies"
-    );
-    res.redirect("/admin/dashboard");
+      req.flash(
+        "success_msg",
+        "Verification process triggered for all pending proxies"
+      );
+      res.redirect("/admin/dashboard");
+    });
   } catch (err) {
     console.error(err);
     req.flash("error_msg", "Error triggering verification process");
@@ -108,4 +108,4 @@ router.post("/trigger-all", isAuthenticated, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

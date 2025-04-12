@@ -1,11 +1,11 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { isAuthenticated } = require("../middlewares/auth");
-const { renderDashboard } = require("../controllers/dashboardController");
+import { isAuthenticated } from "../middlewares/auth.js";
+import { renderDashboard } from "../controllers/dashboardController.js";
 
 // Define your routes here
 
-module.exports = router; // Home route
+// Home route
 router.get("/", (req, res) => {
   if (req.isAuthenticated()) {
     return res.redirect("/dashboard");
@@ -44,4 +44,4 @@ router.get("/privacy", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router; // assuming you're creating a router

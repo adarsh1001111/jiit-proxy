@@ -1,19 +1,23 @@
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
+import "dotenv/config";
 
-// Create transporter (in production, use real credentials)
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.example.com",
-  port: process.env.EMAIL_PORT || 587,
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER || "user@example.com",
-    pass: process.env.EMAIL_PASS || "password",
-  },
-});
+// Create transporter
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || "smtp.gmail.com",
+    port: process.env.EMAIL_PORT || 587,
+    secure: process.env.EMAIL_SECURE === "true",
+    auth: {
+      user: process.env.EMAIL_USER || "user@example.com",
+      pass: process.env.EMAIL_PASS || "password",
+    },
+  });
+};
 
 // Send verification email
-const sendVerificationEmail = async (email, token) => {
+export const sendVerificationEmail = async (email, token) => {
   try {
+    const transporter = createTransporter();
     const verificationUrl = `${process.env.APP_URL}/auth/verify/${token}`;
 
     const mailOptions = {
@@ -46,8 +50,10 @@ const sendVerificationEmail = async (email, token) => {
 };
 
 // Send notification email
-const sendNotificationEmail = async (email, subject, message) => {
+export const sendNotificationEmail = async (email, subject, message) => {
   try {
+    const transporter = createTransporter();
+
     const mailOptions = {
       from: process.env.EMAIL_FROM || "JIIT Proxy <noreply@jiitproxy.com>",
       to: email,
@@ -67,9 +73,4 @@ const sendNotificationEmail = async (email, subject, message) => {
     console.error("Error sending notification email:", error);
     return false;
   }
-};
-
-module.exports = {
-  sendVerificationEmail,
-  sendNotificationEmail,
 };

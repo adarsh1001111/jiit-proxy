@@ -1,13 +1,14 @@
-const express = require("express");
-const router = express.Router();
-const { isAuthenticated } = require("../middlewares/auth");
-const User = require("../models/User");
-const Payment = require("../models/Payment");
-const {
+import express from "express";
+import { isAuthenticated } from "../middlewares/auth.js";
+import User from "../models/User.js";
+import Payment from "../models/Payment.js";
+import {
   addFundsToWallet,
   withdrawFundsFromWallet,
-} = require("../services/paymentService");
-const crypto = require("crypto");
+} from "../services/paymentService.js";
+import crypto from "crypto";
+
+const router = express.Router();
 
 // Add funds page
 router.get("/add-funds", isAuthenticated, (req, res) => {
@@ -131,4 +132,4 @@ router.get("/transactions", isAuthenticated, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,4 +1,5 @@
-const isAuthenticated = (req, res, next) => {
+// middlewares/auth.js
+export const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
@@ -6,23 +7,17 @@ const isAuthenticated = (req, res, next) => {
   res.redirect("/auth/login");
 };
 
-const isNotAuthenticated = (req, res, next) => {
+export const isNotAuthenticated = (req, res, next) => {
   if (!req.isAuthenticated()) {
     return next();
   }
   res.redirect("/dashboard");
 };
 
-const isAdmin = (req, res, next) => {
+export const isAdmin = (req, res, next) => {
   if (req.user && req.user.isAdmin) {
     return next();
   }
   req.flash("error_msg", "You do not have permission to access this page");
   res.redirect("/dashboard");
-};
-
-module.exports = {
-  isAuthenticated,
-  isNotAuthenticated,
-  isAdmin,
 };

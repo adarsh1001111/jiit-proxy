@@ -1,11 +1,11 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { isAuthenticated } = require("../middlewares/auth");
-const ProxyRequest = require("../models/ProxyRequest");
-const User = require("../models/User");
-const Payment = require("../models/Payment");
-const { generateTransactionId } = require("../utils/helpers");
-const { processProxyPayment } = require("../services/paymentService");
+import { isAuthenticated } from "../middlewares/auth.js";
+import ProxyRequest from "../models/ProxyRequest.js";
+// import User from "../models/User.js";
+// import Payment from "../models/Payment.js";
+import { generateTransactionId } from "../utils/helpers.js";
+import { processProxyPayment } from "../services/paymentService.js";
 
 // Get all available proxy requests
 router.get("/available", isAuthenticated, async (req, res) => {
@@ -193,4 +193,4 @@ router.post("/cancel/:id", isAuthenticated, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router; // assuming you're creating a router

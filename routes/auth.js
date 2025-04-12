@@ -1,10 +1,13 @@
-const express = require("express");
+import express from "express";
+import bcrypt from "bcryptjs";
+import passport from "passport";
+import crypto from "crypto";
+import { WebPortal } from "jsjiit";
+import User from "../models/User.js";
+import { isNotAuthenticated, isAuthenticated } from "../middlewares/auth.js";
+import { sendVerificationEmail } from "../utils/email.js";
+
 const router = express.Router();
-const passport = require("passport");
-const User = require("../models/User");
-const { isNotAuthenticated, isAuthenticated } = require("../middlewares/auth");
-const { sendVerificationEmail } = require("../utils/email");
-const crypto = require("crypto");
 
 // Register
 router.get("/register", isNotAuthenticated, (req, res) => {
@@ -34,7 +37,7 @@ router.post("/register", isNotAuthenticated, async (req, res) => {
       });
     }
 
-    if (!email.endsWith("@jiit.ac.in")) {
+    if (!email.endsWith("@jiit.ac.in") && !email.endsWith("@mail.jiit.ac.in")) {
       return res.render("auth/register", {
         error: "Please use your JIIT email address",
         name,
@@ -56,6 +59,27 @@ router.post("/register", isNotAuthenticated, async (req, res) => {
       });
     }
 
+    // Validate JIIT credentials
+    try {
+      const jiit = new JSJIIT();
+      await jiit.login(jiitPortalUsername, jiitPortalPassword);
+
+      // Get user details to verify
+      const userInfo = await jiit.getUserInfo();
+      console.log("User info:", userInfo);
+
+      // Additional verification could be done here
+    } catch (jiitError) {
+      console.error("JIIT Portal validation error:", jiitError);
+      return res.render("auth/register", {
+        error:
+          "Invalid JIIT portal credentials. Please check your username and password.",
+        name,
+        email,
+        enrollmentNumber,
+      });
+    }
+
     // Create new user
     const newUser = new User({
       name,
@@ -64,24 +88,21 @@ router.post("/register", isNotAuthenticated, async (req, res) => {
       enrollmentNumber,
       jiitPortalUsername,
       jiitPortalPassword,
+      isVerified: true, // Auto-verify since JIIT credentials are valid
     });
 
     await newUser.save();
 
-    // Send verification email
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    // Store token in database (implementation omitted)
-    sendVerificationEmail(email, verificationToken);
-
-    req.flash(
-      "success_msg",
-      "You are now registered. Please check your email to verify your account."
-    );
+    req.flash("success_msg", "You are now registered and can log in");
     res.redirect("/auth/login");
   } catch (err) {
-    console.error(err);
+    console.error("Registration error:", err);
     res.render("auth/register", {
       error: "An error occurred during registration",
+      name: req.body.name,
+      email: req.body.email,
+      enrollmentNumber: req.body.enrollmentNumber,
+      jiitPortalUsername: req.body.jiitPortalUsername,
     });
   }
 });
@@ -101,21 +122,14 @@ router.post("/login", isNotAuthenticated, (req, res, next) => {
 
 // Logout
 router.get("/logout", isAuthenticated, (req, res) => {
-  req.logout();
-  req.flash("success_msg", "You are logged out");
-  res.redirect("/auth/login");
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    req.flash("success_msg", "You are logged out");
+    res.redirect("/auth/login");
+  });
 });
 
-// Email verification
-router.get("/verify/:token", async (req, res) => {
-  try {
-    const { token } = req.params;
-    // Verify token and mark user as verified (implementation omitted)
-    res.redirect("/auth/login?verified=true");
-  } catch (err) {
-    console.error(err);
-    res.redirect("/auth/login?verified=false");
-  }
-});
-
-module.exports = router;
+// Export router
+export default router;

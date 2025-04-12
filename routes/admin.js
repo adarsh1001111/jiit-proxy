@@ -1,10 +1,11 @@
-const express = require("express");
+import express from "express";
+import { isAuthenticated, isAdmin } from "../middlewares/auth.js";
+import User from "../models/User.js";
+import ProxyRequest from "../models/ProxyRequest.js";
+import Payment from "../models/Payment.js";
+import { scheduleVerifications } from "../services/verificationService.js";
+
 const router = express.Router();
-const { isAuthenticated, isAdmin } = require("../middlewares/auth");
-const User = require("../models/User");
-const ProxyRequest = require("../models/ProxyRequest");
-const Payment = require("../models/Payment");
-const { scheduleVerifications } = require("../services/verificationService");
 
 // Admin dashboard
 router.get("/dashboard", isAuthenticated, isAdmin, async (req, res) => {
@@ -324,4 +325,4 @@ router.post(
   }
 );
 
-module.exports = router;
+export default router;

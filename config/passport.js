@@ -1,7 +1,8 @@
-const LocalStrategy = require("passport-local").Strategy;
-const User = require("../models/User");
+// config/passport.js
+import { Strategy as LocalStrategy } from "passport-local";
+import User from "../models/User.js";
 
-module.exports = function (passport) {
+const configurePassport = (passport) => {
   passport.use(
     new LocalStrategy(
       { usernameField: "email" },
@@ -43,3 +44,5 @@ module.exports = function (passport) {
     }
   });
 };
+
+export default configurePassport;

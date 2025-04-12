@@ -1,12 +1,12 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 
 // Generate transaction ID
-const generateTransactionId = () => {
+export const generateTransactionId = () => {
   return crypto.randomBytes(16).toString("hex");
 };
 
 // Format date to readable format
-const formatDate = (date) => {
+export const formatDate = (date) => {
   const d = new Date(date);
   return d.toLocaleDateString("en-IN", {
     day: "numeric",
@@ -16,7 +16,7 @@ const formatDate = (date) => {
 };
 
 // Format time to readable format
-const formatTime = (time) => {
+export const formatTime = (time) => {
   // Convert 24-hour format to 12-hour format with AM/PM
   const [hours, minutes] = time.split(":");
   const h = parseInt(hours);
@@ -26,7 +26,7 @@ const formatTime = (time) => {
 };
 
 // Calculate time difference in minutes
-const calculateTimeDifference = (startTime, endTime) => {
+export const calculateTimeDifference = (startTime, endTime) => {
   const [startHours, startMinutes] = startTime.split(":").map(Number);
   const [endHours, endMinutes] = endTime.split(":").map(Number);
 
@@ -34,11 +34,4 @@ const calculateTimeDifference = (startTime, endTime) => {
   const endTotalMinutes = endHours * 60 + endMinutes;
 
   return endTotalMinutes - startTotalMinutes;
-};
-
-module.exports = {
-  generateTransactionId,
-  formatDate,
-  formatTime,
-  calculateTimeDifference,
 };

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JIIT Proxy - Transaction History</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <%- include('../partials/header') %>
+
+    <main class="container mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Transaction History</h1>
+
+        <div class="flex space-x-2">
+          <a
+            href="/payment/add-funds"
+            class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            Add Funds
+          </a>
+
+          <a
+            href="/payment/withdraw"
+            class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Withdraw
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Current Balance -->
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-800">Current Balance</h2>
+          <p class="text-2xl font-bold text-green-600">
+            ₹<%= user.walletBalance.toFixed(2) %>
+          </p>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Date
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Description
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Amount
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Transaction ID
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% if(transactions && transactions.length > 0) { %> <%
+              transactions.forEach(transaction => { %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= new Date(transaction.createdAt).toLocaleDateString() %>
+                  <div class="text-xs text-gray-400">
+                    <%= new Date(transaction.createdAt).toLocaleTimeString() %>
+                  </div>
+                </td>
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <% if (transaction.type === 'deposit') { %> Added funds to
+                  wallet <% } else if (transaction.type === 'withdrawal') { %>
+                  Withdrew funds from wallet <% } else if (transaction.type ===
+                  'proxy-payment') { %> Payment for proxy request <% if
+                  (transaction.proxyRequest) { %>
+                  <div class="text-xs text-gray-500">
+                    <%= transaction.proxyRequest.course %> - <%= new
+                    Date(transaction.proxyRequest.date).toLocaleDateString() %>
+                  </div>
+                  <% } %> <% } else if (transaction.type === 'proxy-refund') {
+                  %> Refund for proxy request <% if (transaction.proxyRequest) {
+                  %>
+                  <div class="text-xs text-gray-500">
+                    <%= transaction.proxyRequest.course %> - <%= new
+                    Date(transaction.proxyRequest.date).toLocaleDateString() %>
+                  </div>
+                  <% } %> <% } else if (transaction.type === 'proxy-earning') {
+                  %> Earning from proxy completion <% if
+                  (transaction.proxyRequest) { %>
+                  <div class="text-xs text-gray-500">
+                    <%= transaction.proxyRequest.course %> - <%= new
+                    Date(transaction.proxyRequest.date).toLocaleDateString() %>
+                  </div>
+                  <% } %> <% } %>
+                </td>
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <% if (['deposit', 'proxy-refund',
+                  'proxy-earning'].includes(transaction.type)) { %>
+                  <span class="text-green-600"
+                    >+₹<%= transaction.amount.toFixed(2) %></span
+                  >
+                  <% } else { %>
+                  <span class="text-red-600"
+                    >-₹<%= transaction.amount.toFixed(2) %></span
+                  >
+                  <% } %>
+                </td>
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <% if (transaction.status === 'completed') { %>
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                  >
+                    Completed
+                  </span>
+                  <% } else if (transaction.status === 'pending') { %>
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"
+                  >
+                    Pending
+                  </span>
+                  <% } else if (transaction.status === 'failed') { %>
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                  >
+                    Failed
+                  </span>
+                  <% } else if (transaction.status === 'refunded') { %>
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
+                  >
+                    Refunded
+                  </span>
+                  <% } %>
+                </td>
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <span class="text-xs font-mono"
+                    ><%= transaction.transactionId.substring(0, 8) %>...</span
+                  >
+                </td>
+              </tr>
+              <% }) %> <% } else { %>
+              <tr>
+                <td
+                  colspan="5"
+                  class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"
+                >
+                  No transactions found
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>

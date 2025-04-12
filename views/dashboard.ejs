@@ -1,0 +1,433 @@
+<%- include('layouts/main', { title: 'Dashboard' }) %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h1
+        class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate"
+      >
+        Welcome, <%= user.name %>!
+      </h1>
+    </div>
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <a
+        href="/proxy/create"
+        class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="fas fa-plus mr-2"></i> Create Proxy Request
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+    <!-- Wallet Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+            <i class="fas fa-wallet text-white text-2xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">
+                Wallet Balance
+              </dt>
+              <dd>
+                <div class="text-lg font-medium text-gray-900">
+                  ₹<%= user.walletBalance.toFixed(2) %>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+        <div class="mt-4 flex">
+          <a
+            href="/payment/add-funds"
+            class="text-sm font-medium text-blue-600 hover:text-blue-500"
+          >
+            Add Funds <span aria-hidden="true">&rarr;</span>
+          </a>
+          <span class="mx-2 text-gray-500">|</span>
+          <a
+            href="/payment/withdraw"
+            class="text-sm font-medium text-blue-600 hover:text-blue-500"
+          >
+            Withdraw <span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+            <i class="fas fa-chart-line text-white text-2xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">
+                Your Stats
+              </dt>
+              <dd>
+                <div class="text-lg font-medium text-gray-900">
+                  <%= user.successfulProxies %> Successful / <%=
+                  user.failedProxies %> Failed
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="flex items-center">
+            <div class="text-sm font-medium text-gray-500 mr-2">Rating:</div>
+            <div class="star-rating">
+              <% for(let i = 1; i <= 5; i++) { %> <% if(i <= user.rating) { %>
+              <span class="star-full"><i class="fas fa-star"></i></span>
+              <% } else if(i - 0.5 <= user.rating) { %>
+              <span class="star-half">
+                <i class="fas fa-star-half-alt"></i>
+                <i class="far fa-star"></i>
+              </span>
+              <% } else { %>
+              <span class="star-empty"><i class="far fa-star"></i></span>
+              <% } %> <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+            <i class="fas fa-link text-white text-2xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">
+                Quick Links
+              </dt>
+            </dl>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-4">
+          <a
+            href="/proxy/available"
+            class="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center"
+          >
+            <i class="fas fa-search mr-2"></i> Available Proxies
+          </a>
+          <a
+            href="/proxy/my-requests"
+            class="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center"
+          >
+            <i class="fas fa-clipboard-list mr-2"></i> My Requests
+          </a>
+          <a
+            href="/proxy/my-tasks"
+            class="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center"
+          >
+            <i class="fas fa-tasks mr-2"></i> My Tasks
+          </a>
+          <a
+            href="/payment/transactions"
+            class="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center"
+          >
+            <i class="fas fa-history mr-2"></i> Transactions
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requested Proxies -->
+  <div class="mt-8">
+    <h2 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+      Your Requested Proxies
+    </h2>
+    <% if(requestedProxies && requestedProxies.length > 0) { %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% requestedProxies.forEach(proxy => { %>
+        <li>
+          <div class="px-4 py-4 sm:px-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2">
+                  <i class="fas fa-book text-blue-600"></i>
+                </div>
+                <p class="ml-3 text-sm font-medium text-blue-600 truncate">
+                  <%= proxy.course %> (<%= proxy.courseCode %>)
+                </p>
+              </div>
+              <div class="ml-2 flex-shrink-0 flex">
+                <p
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"
+                >
+                  <%= proxy.status.charAt(0).toUpperCase() +
+                  proxy.status.slice(1) %>
+                </p>
+              </div>
+            </div>
+            <div class="mt-2 sm:flex sm:justify-between">
+              <div class="sm:flex">
+                <p class="flex items-center text-sm text-gray-500">
+                  <i class="fas fa-calendar-day mr-1.5 text-gray-400"></i>
+                  <%= new Date(proxy.date).toLocaleDateString('en-IN', { day:
+                  'numeric', month: 'short', year: 'numeric' }) %>
+                </p>
+                <p
+                  class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6"
+                >
+                  <i class="fas fa-clock mr-1.5 text-gray-400"></i>
+                  <%= proxy.startTime %> - <%= proxy.endTime %>
+                </p>
+                <p
+                  class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6"
+                >
+                  <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                  <%= proxy.location %>
+                </p>
+              </div>
+              <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                <i class="fas fa-rupee-sign mr-1.5 text-gray-400"></i>
+                <%= proxy.amount %>
+              </div>
+            </div>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } else { %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+      <p class="text-gray-500">You don't have any open proxy requests.</p>
+      <a
+        href="/proxy/create"
+        class="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Create a Proxy Request
+      </a>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Accepted Proxies -->
+  <div class="mt-8">
+    <h2 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+      Your Accepted Proxies
+    </h2>
+    <% if(acceptedProxies && acceptedProxies.length > 0) { %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% acceptedProxies.forEach(proxy => { %>
+        <li>
+          <div class="px-4 py-4 sm:px-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 bg-green-100 rounded-md p-2">
+                  <i class="fas fa-user-check text-green-600"></i>
+                </div>
+                <p class="ml-3 text-sm font-medium text-green-600 truncate">
+                  <%= proxy.course %> (<%= proxy.courseCode %>)
+                </p>
+              </div>
+              <div class="ml-2 flex-shrink-0 flex">
+                <p
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                >
+                  <%= proxy.status.charAt(0).toUpperCase() +
+                  proxy.status.slice(1) %>
+                </p>
+              </div>
+            </div>
+            <div class="mt-2 sm:flex sm:justify-between">
+              <div class="sm:flex">
+                <p class="flex items-center text-sm text-gray-500">
+                  <i class="fas fa-calendar-day mr-1.5 text-gray-400"></i>
+                  <%= new Date(proxy.date).toLocaleDateString('en-IN', { day:
+                  'numeric', month: 'short', year: 'numeric' }) %>
+                </p>
+                <p
+                  class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6"
+                >
+                  <i class="fas fa-clock mr-1.5 text-gray-400"></i>
+                  <%= proxy.startTime %> - <%= proxy.endTime %>
+                </p>
+                <p
+                  class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6"
+                >
+                  <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                  <%= proxy.location %>
+                </p>
+              </div>
+              <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                <i class="fas fa-rupee-sign mr-1.5 text-gray-400"></i>
+                <%= proxy.amount %>
+              </div>
+            </div>
+            <div class="mt-2 flex items-center">
+              <p class="text-sm text-gray-500">
+                <i class="fas fa-user mr-1.5 text-gray-400"></i>
+                Requested by: <%= proxy.requester.name %>
+              </p>
+              <div class="ml-4 flex items-center">
+                <span class="text-sm text-gray-500 mr-1">Rating:</span>
+                <div class="star-rating">
+                  <% for(let i = 1; i <= 5; i++) { %> <% if(i <=
+                  proxy.requester.rating) { %>
+                  <span class="star-full"><i class="fas fa-star"></i></span>
+                  <% } else if(i - 0.5 <= proxy.requester.rating) { %>
+                  <span class="star-half">
+                    <i class="fas fa-star-half-alt"></i>
+                    <i class="far fa-star"></i>
+                  </span>
+                  <% } else { %>
+                  <span class="star-empty"><i class="far fa-star"></i></span>
+                  <% } %> <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } else { %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+      <p class="text-gray-500">You haven't accepted any proxy requests yet.</p>
+      <a
+        href="/proxy/available"
+        class="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Browse Available Proxies
+      </a>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Upcoming Classes -->
+  <div class="mt-8">
+    <h2 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+      Your Upcoming Classes
+    </h2>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% upcomingClasses.forEach(cls => { %>
+        <li>
+          <div class="px-4 py-4 sm:px-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 bg-purple-100 rounded-md p-2">
+                  <i class="fas fa-chalkboard-teacher text-purple-600"></i>
+                </div>
+                <p class="ml-3 text-sm font-medium text-purple-600 truncate">
+                  <%= cls.course %> (<%= cls.courseCode %>)
+                </p>
+              </div>
+              <div class="ml-2 flex-shrink-0 flex">
+                <a
+                  href="/proxy/create"
+                  class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Request Proxy
+                </a>
+              </div>
+            </div>
+            <div class="mt-2 sm:flex sm:justify-between">
+              <div class="sm:flex">
+                <p class="flex items-center text-sm text-gray-500">
+                  <i class="fas fa-calendar-day mr-1.5 text-gray-400"></i>
+                  <%= cls.date.toLocaleDateString('en-IN', { day: 'numeric',
+                  month: 'short', year: 'numeric' }) %>
+                </p>
+                <p
+                  class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6"
+                >
+                  <i class="fas fa-clock mr-1.5 text-gray-400"></i>
+                  <%= cls.startTime %> - <%= cls.endTime %>
+                </p>
+                <p
+                  class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6"
+                >
+                  <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                  <%= cls.location %>
+                </p>
+              </div>
+            </div>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Top Proxy Providers -->
+  <div class="mt-8">
+    <h2 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+      Top Proxy Providers
+    </h2>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% topProviders.forEach((provider, index) => { %>
+        <li>
+          <div class="px-4 py-4 sm:px-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div
+                  class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold"
+                >
+                  <%= provider.name.charAt(0) %>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= provider.name %>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="star-rating">
+                      <% for(let i = 1; i <= 5; i++) { %> <% if(i <=
+                      provider.rating) { %>
+                      <span class="star-full"><i class="fas fa-star"></i></span>
+                      <% } else if(i - 0.5 <= provider.rating) { %>
+                      <span class="star-half">
+                        <i class="fas fa-star-half-alt"></i>
+                        <i class="far fa-star"></i>
+                      </span>
+                      <% } else { %>
+                      <span class="star-empty"
+                        ><i class="far fa-star"></i
+                      ></span>
+                      <% } %> <% } %>
+                    </div>
+                    <span class="ml-2 text-sm text-gray-500"
+                      >(<%= provider.rating.toFixed(1) %>)</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div class="text-sm text-gray-500 mr-4">
+                  <span class="font-medium text-green-600"
+                    ><%= provider.successfulProxies %></span
+                  >
+                  Successful
+                </div>
+                <div class="text-sm text-gray-500">
+                  <span class="font-medium text-red-600"
+                    ><%= provider.failedProxies %></span
+                  >
+                  Failed
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+  </div>
+</div>

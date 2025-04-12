@@ -1,0 +1,73 @@
+.payment-details,
+.withdrawal-details {
+  transition: all 0.3s ease;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Star rating styles */
+.star-rating {
+  display: inline-flex;
+}
+
+.star-rating svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.star-rating .star-full {
+  color: #fbbf24;
+}
+
+.star-rating .star-half {
+  position: relative;
+}
+
+.star-rating .star-half svg:first-child {
+  color: #fbbf24;
+  position: absolute;
+  width: 50%;
+  overflow: hidden;
+}
+
+.star-rating .star-half svg:last-child {
+  color: #e5e7eb;
+}
+
+.star-rating .star-empty {
+  color: #e5e7eb;
+}
+
+/* Transaction history table styles */
+.transaction-type-deposit,
+.transaction-type-proxy-refund,
+.transaction-type-proxy-earning {
+  color: #047857; /* green-700 */
+}
+
+.transaction-type-withdrawal,
+.transaction-type-proxy-payment {
+  color: #dc2626; /* red-600 */
+}
+
+.transaction-status-completed {
+  background-color: #d1fae5; /* green-100 */
+  color: #065f46; /* green-800 */
+}
+
+.transaction-status-pending {
+  background-color: #fef3c7; /* yellow-100 */
+  color: #92400e; /* yellow-800 */
+}
+
+.transaction-status-failed {
+  background-color: #fee2e2; /* red-100 */
+  color: #991b1b; /* red-800 */
+}
+
+.transaction-status-refunded {
+  background-color: #dbeafe; /* blue-100 */
+  color: #1e40af; /* blue-800 */
+}

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JIIT Proxy - Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <%- include('../partials/header') %>
+
+    <main class="container mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+
+        <form action="/admin/verify-attendance" method="POST">
+          <button
+            type="submit"
+            class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Trigger Attendance Verification
+          </button>
+        </form>
+      </div>
+
+      <% if(success_msg) { %>
+      <div
+        class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6"
+      >
+        <%= success_msg %>
+      </div>
+      <% } %> <% if(error_msg) { %>
+      <div
+        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6"
+      >
+        <%= error_msg %>
+      </div>
+      <% } %>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">Total Users</p>
+              <p class="text-3xl font-bold text-gray-800"><%= totalUsers %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-yellow-100 text-yellow-500 mr-4">
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">Active Proxies</p>
+              <p class="text-3xl font-bold text-gray-800">
+                <%= activeProxies %>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100 text-green-500 mr-4">
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">Completed Proxies</p>
+              <p class="text-3xl font-bold text-gray-800">
+                <%= completedProxies %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Links</h2>
+          <div class="space-y-3">
+            <a
+              href="/admin/users"
+              class="block text-blue-600 hover:text-blue-800"
+            >
+              Manage Users
+            </a>
+            <a
+              href="/admin/proxies"
+              class="block text-blue-600 hover:text-blue-800"
+            >
+              Manage Proxy Requests
+            </a>
+            <a
+              href="/admin/withdrawals"
+              class="block text-blue-600 hover:text-blue-800"
+            >
+              Process Withdrawals
+            </a>
+          </div>
+        </div>
+
+        <!-- Top Providers -->
+        <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            Top Proxy Providers
+          </h2>
+
+          <% if(topProviders && topProviders.length > 0) { %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    User
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Successful Proxies
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Failed Proxies
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Success Rate
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Rating
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% topProviders.forEach(provider => { %>
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <a
+                      href="/admin/users/<%= provider._id %>"
+                      class="text-blue-600 hover:text-blue-800"
+                    >
+                      <%= provider.name %>
+                    </a>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    <%= provider.successfulProxies %>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    <%= provider.failedProxies %>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    <%= provider.successfulProxies + provider.failedProxies > 0
+                    ? Math.round((provider.successfulProxies /
+                    (provider.successfulProxies + provider.failedProxies)) *
+                    100) : 0 %>%
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex">
+                      <% for(let i = 0; i < Math.floor(provider.rating); i++) {
+                      %>
+                      <svg
+                        class="w-4 h-4 text-yellow-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"
+                        ></path>
+                      </svg>
+                      <% } %> <% if (provider.rating % 1 !== 0) { %>
+                      <svg
+                        class="w-4 h-4 text-yellow-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <defs>
+                          <linearGradient id="halfStar<%= provider._id %>">
+                            <stop offset="50%" stop-color="currentColor" />
+                            <stop offset="50%" stop-color="#e5e7eb" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          fill="url(#halfStar<%= provider._id %>)"
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"
+                        ></path>
+                      </svg>
+                      <% } %> <% for(let i = 0; i < (5 -
+                      Math.ceil(provider.rating)); i++) { %>
+                      <svg
+                        class="w-4 h-4 text-gray-300"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"
+                        ></path>
+                      </svg>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <% } else { %>
+          <p class="text-gray-500">No data available</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Pending Withdrawals -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Pending Withdrawals
+        </h2>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <% if(pendingWithdrawals && pendingWithdrawals.length > 0) { %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    User
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Method
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Date
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% pendingWithdrawals.forEach(withdrawal => { %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <a
+                      href="/admin/users/<%= withdrawal.user._id %>"
+                      class="text-blue-600 hover:text-blue-800"
+                    >
+                      <%= withdrawal.user.name %>
+                    </a>
+                    <div class="text-xs text-gray-500">
+                      <%= withdrawal.user.email %>
+                    </div>
+                  </td>
+                  <td
+                    class="px-6 py-4 whitespace-nowrap font-medium text-gray-900"
+                  >
+                    ₹<%= withdrawal.amount.toFixed(2) %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= withdrawal.paymentMethod.charAt(0).toUpperCase() +
+                    withdrawal.paymentMethod.slice(1) %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= new Date(withdrawal.createdAt).toLocaleDateString() %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <form
+                      action="/admin/withdrawals/<%= withdrawal._id %>/process"
+                      method="POST"
+                      class="flex space-x-2"
+                    >
+                      <button
+                        type="submit"
+                        name="status"
+                        value="completed"
+                        class="text-green-600 hover:text-green-900"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="submit"
+                        name="status"
+                        value="failed"
+                        class="text-red-600 hover:text-red-900"
+                      >
+                        Reject
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <% } else { %>
+          <div class="p-6 text-center">
+            <p class="text-gray-500">No pending withdrawals</p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Recent Transactions
+        </h2>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <% if(recentTransactions && recentTransactions.length > 0) { %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Date
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    User
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Type
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% recentTransactions.forEach(transaction => { %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= new Date(transaction.createdAt).toLocaleDateString() %>
+                    <div class="text-xs text-gray-400">
+                      <%= new Date(transaction.createdAt).toLocaleTimeString()
+                      %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <a
+                      href="/admin/users/<%= transaction.user._id %>"
+                      class="text-blue-600 hover:text-blue-800"
+                    >
+                      <%= transaction.user.name %>
+                    </a>
+                    <div class="text-xs text-gray-500">
+                      <%= transaction.user.email %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <% if (transaction.type === 'deposit') { %> Wallet Deposit
+                    <% } else if (transaction.type === 'withdrawal') { %> Wallet
+                    Withdrawal <% } else if (transaction.type ===
+                    'proxy-payment') { %> Proxy Payment <% } else if
+                    (transaction.type === 'proxy-refund') { %> Proxy Refund <% }
+                    else if (transaction.type === 'proxy-earning') { %> Proxy
+                    Earning <% } %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <% if (['deposit', 'proxy-refund',
+                    'proxy-earning'].includes(transaction.type)) { %>
+                    <span class="text-green-600"
+                      >+₹<%= transaction.amount.toFixed(2) %></span
+                    >
+                    <% } else { %>
+                    <span class="text-red-600"
+                      >-₹<%= transaction.amount.toFixed(2) %></span
+                    >
+                    <% } %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <% if (transaction.status === 'completed') { %>
+                    <span
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                    >
+                      Completed
+                    </span>
+                    <% } else if (transaction.status === 'pending') { %>
+                    <span
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"
+                    >
+                      Pending
+                    </span>
+                    <% } else if (transaction.status === 'failed') { %>
+                    <span
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                    >
+                      Failed
+                    </span>
+                    <% } else if (transaction.status === 'refunded') { %>
+                    <span
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
+                    >
+                      Refunded
+                    </span>
+                    <% } %>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <% } else { %>
+          <div class="p-6 text-center">
+            <p class="text-gray-500">No transactions found</p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>

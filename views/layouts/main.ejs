@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      JIIT Proxy - <% if (typeof title !== 'undefined') { %> <%= title %> <% }
+      else { %> Attendance Made Easy <% } %>
+    </title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3B82F6" />
+    <meta
+      name="description"
+      content="JIIT Proxy - The easiest way to manage your attendance"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="JIIT Proxy" />
+
+    <!-- PWA Links -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body
+    class="bg-gray-50 min-h-screen flex flex-col"
+    x-data="{ mobileMenu: false }"
+  >
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
+        <div
+          class="w-full py-4 flex items-center justify-between border-b border-gray-200 lg:border-none"
+        >
+          <div class="flex items-center">
+            <a
+              href="<%= user ? '/dashboard' : '/' %>"
+              class="flex items-center"
+            >
+              <img
+                class="h-10 w-auto"
+                src="/images/logo.png"
+                alt="JIIT Proxy Logo"
+              />
+              <span class="ml-2 text-xl font-bold text-blue-600"
+                >JIIT Proxy</span
+              >
+            </a>
+            <div class="hidden ml-10 space-x-8 lg:block">
+              <% if (user) { %>
+              <a
+                href="/dashboard"
+                class="text-base font-medium text-gray-700 hover:text-blue-600"
+                >Dashboard</a
+              >
+              <a
+                href="/proxy/available"
+                class="text-base font-medium text-gray-700 hover:text-blue-600"
+                >Available Proxies</a
+              >
+              <a
+                href="/proxy/my-requests"
+                class="text-base font-medium text-gray-700 hover:text-blue-600"
+                >My Requests</a
+              >
+              <a
+                href="/proxy/my-tasks"
+                class="text-base font-medium text-gray-700 hover:text-blue-600"
+                >My Tasks</a
+              >
+              <% if (user.isAdmin) { %>
+              <a
+                href="/admin/dashboard"
+                class="text-base font-medium text-gray-700 hover:text-blue-600"
+                >Admin</a
+              >
+              <% } %> <% } else { %>
+              <a
+                href="/about"
+                class="text-base font-medium text-gray-700 hover:text-blue-600"
+                >About</a
+              >
+              <a
+                href="/contact"
+                class="text-base font-medium text-gray-700 hover:text-blue-600"
+                >Contact</a
+              >
+              <% } %>
+            </div>
+          </div>
+          <div class="ml-10 space-x-4 flex items-center">
+            <% if (user) { %>
+            <div class="hidden lg:flex items-center">
+              <span class="text-sm font-medium text-gray-700 mr-4">
+                Wallet: ₹<%= user.walletBalance.toFixed(2) %>
+              </span>
+              <div class="relative" x-data="{ open: false }">
+                <button
+                  @click="open = !open"
+                  class="flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 focus:outline-none"
+                >
+                  <span><%= user.name %></span>
+                  <svg
+                    class="ml-1 h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <div
+                  x-show="open"
+                  @click.away="open = false"
+                  class="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-10"
+                  style="display: none"
+                >
+                  <a
+                    href="/profile"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Profile</a
+                  >
+                  <a
+                    href="/payment/add-funds"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Add Funds</a
+                  >
+                  <a
+                    href="/payment/withdraw"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Withdraw</a
+                  >
+                  <a
+                    href="/payment/transactions"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Transactions</a
+                  >
+                  <div class="border-t border-gray-100"></div>
+                  <a
+                    href="/auth/logout"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Logout</a
+                  >
+                </div>
+              </div>
+            </div>
+            <% } else { %>
+            <a
+              href="/auth/login"
+              class="inline-block bg-white py-2 px-4 border border-blue-600 rounded-md text-base font-medium text-blue-600 hover:bg-gray-50"
+            >
+              Log in
+            </a>
+            <a
+              href="/auth/register"
+              class="inline-block bg-blue-600 py-2 px-4 border border-transparent rounded-md text-base font-medium text-white hover:bg-blue-700"
+            >
+              Sign up
+            </a>
+            <% } %>
+            <div class="lg:hidden">
+              <button
+                @click="mobileMenu = !mobileMenu"
+                type="button"
+                class="bg-white p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              >
+                <span class="sr-only">Open menu</span>
+                <svg
+                  class="h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div x-show="mobileMenu" class="lg:hidden" style="display: none">
+          <div class="pt-2 pb-3 space-y-1">
+            <% if (user) { %>
+            <a
+              href="/dashboard"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >Dashboard</a
+            >
+            <a
+              href="/proxy/available"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >Available Proxies</a
+            >
+            <a
+              href="/proxy/my-requests"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >My Requests</a
+            >
+            <a
+              href="/proxy/my-tasks"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >My Tasks</a
+            >
+            <% if (user.isAdmin) { %>
+            <a
+              href="/admin/dashboard"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >Admin</a
+            >
+            <% } %> <% } else { %>
+            <a
+              href="/about"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >About</a
+            >
+            <a
+              href="/contact"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >Contact</a
+            >
+            <% } %>
+          </div>
+          <% if (user) { %>
+          <div class="pt-4 pb-3 border-t border-gray-200">
+            <div class="flex items-center px-4">
+              <div class="flex-shrink-0">
+                <div
+                  class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold"
+                >
+                  <%= user.name.charAt(0) %>
+                </div>
+              </div>
+              <div class="ml-3">
+                <div class="text-base font-medium text-gray-800">
+                  <%= user.name %>
+                </div>
+                <div class="text-sm font-medium text-gray-500">
+                  <%= user.email %>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 space-y-1">
+              <div class="px-4 py-2 text-sm text-gray-700">
+                Wallet: ₹<%= user.walletBalance.toFixed(2) %>
+              </div>
+              <a
+                href="/profile"
+                class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                >Profile</a
+              >
+              <a
+                href="/payment/add-funds"
+                class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                >Add Funds</a
+              >
+              <a
+                href="/payment/withdraw"
+                class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                >Withdraw</a
+              >
+              <a
+                href="/payment/transactions"
+                class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                >Transactions</a
+              >
+              <a
+                href="/auth/logout"
+                class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                >Logout</a
+              >
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Flash Messages -->
+    <% if(typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+    <div
+      class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative max-w-7xl mx-auto mt-4"
+      role="alert"
+    >
+      <span class="block sm:inline"><%= success_msg %></span>
+      <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+        <svg
+          class="fill-current h-6 w-6 text-green-500"
+          role="button"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+        >
+          <title>Close</title>
+          <path
+            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"
+          />
+        </svg>
+      </span>
+    </div>
+    <% } %> <% if(typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+    <div
+      class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-7xl mx-auto mt-4"
+      role="alert"
+    >
+      <span class="block sm:inline"><%= error_msg %></span>
+      <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+        <svg
+          class="fill-current h-6 w-6 text-red-500"
+          role="button"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+        >
+          <title>Close</title>
+          <path
+            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"
+          />
+        </svg>
+      </span>
+    </div>
+    <% } %> <% if(typeof error !== 'undefined' && error.length > 0) { %>
+    <div
+      class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-7xl mx-auto mt-4"
+      role="alert"
+    >
+      <span class="block sm:inline"><%= error %></span>
+      <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+        <svg
+          class="fill-current h-6 w-6 text-red-500"
+          role="button"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+        >
+          <title>Close</title>
+          <path
+            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"
+          />
+        </svg>
+      </span>
+    </div>
+    <% } %>
+
+    <!-- Main Content -->
+    <main class="flex-grow"><%- body %></main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-8">
+      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between">
+          <div class="flex justify-center md:justify-start space-x-6">
+            <a href="/" class="text-gray-400 hover:text-gray-500">
+              <span class="sr-only">Home</span>
+              <i class="fas fa-home"></i>
+            </a>
+            <a href="/about" class="text-gray-400 hover:text-gray-500">
+              <span class="sr-only">About</span>
+              <i class="fas fa-info-circle"></i>
+            </a>
+            <a href="/contact" class="text-gray-400 hover:text-gray-500">
+              <span class="sr-only">Contact</span>
+              <i class="fas fa-envelope"></i>
+            </a>
+          </div>
+          <div class="mt-8 md:mt-0">
+            <p class="text-center text-base text-gray-400">
+              &copy; <%= new Date().getFullYear() %> JIIT Proxy. All rights
+              reserved.
+            </p>
+          </div>
+        </div>
+        <div class="mt-4 text-center text-sm text-gray-400">
+          <a href="/terms" class="hover:text-gray-500 mr-4">Terms of Service</a>
+          <a href="/privacy" class="hover:text-gray-500">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("/service-worker.js").then(
+            function (registration) {
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope
+              );
+            },
+            function (err) {
+              console.log("ServiceWorker registration failed: ", err);
+            }
+          );
+        });
+      }
+    </script>
+
+    <!-- Custom JS -->
+    <script src="/js/dashboard.js"></script>
+  </body>
+</html>

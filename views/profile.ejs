@@ -1,0 +1,255 @@
+<%- include('layouts/main', { title: 'Profile' }) %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h1
+        class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate"
+      >
+        Your Profile
+      </h1>
+    </div>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Personal Information
+      </h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        Update your personal details and account settings.
+      </p>
+    </div>
+    <div class="border-t border-gray-200">
+      <dl>
+        <div
+          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+        >
+          <dt class="text-sm font-medium text-gray-500">Full name</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <%= user.name %>
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Email address</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <%= user.email %>
+          </dd>
+        </div>
+        <div
+          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+        >
+          <dt class="text-sm font-medium text-gray-500">Enrollment Number</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <%= user.enrollmentNumber %>
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Account Status</dt>
+          <dd class="mt-1 text-sm sm:mt-0 sm:col-span-2">
+            <% if(user.isVerified) { %>
+            <span
+              class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+            >
+              Verified
+            </span>
+            <% } else { %>
+            <span
+              class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"
+            >
+              Pending Verification
+            </span>
+            <% } %>
+          </dd>
+        </div>
+        <div
+          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+        >
+          <dt class="text-sm font-medium text-gray-500">Wallet Balance</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            ₹<%= user.walletBalance.toFixed(2) %>
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Rating</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <div class="flex items-center">
+              <div class="star-rating">
+                <% for(let i = 1; i <= 5; i++) { %> <% if(i <= user.rating) { %>
+                <span class="star-full"><i class="fas fa-star"></i></span>
+                <% } else if(i - 0.5 <= user.rating) { %>
+                <span class="star-half">
+                  <i class="fas fa-star-half-alt"></i>
+                  <i class="far fa-star"></i>
+                </span>
+                <% } else { %>
+                <span class="star-empty"><i class="far fa-star"></i></span>
+                <% } %> <% } %>
+              </div>
+              <span class="ml-2">(<%= user.rating.toFixed(1) %>)</span>
+            </div>
+          </dd>
+        </div>
+        <div
+          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+        >
+          <dt class="text-sm font-medium text-gray-500">Proxy Stats</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <span class="text-green-600 font-medium"
+              ><%= user.successfulProxies %></span
+            >
+            Successful /
+            <span class="text-red-600 font-medium"
+              ><%= user.failedProxies %></span
+            >
+            Failed
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Update Profile Form -->
+  <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Update Profile
+      </h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        Update your name and JIIT portal credentials.
+      </p>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+      <form action="/profile/update" method="POST">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="col-span-6 sm:col-span-4">
+            <label for="name" class="block text-sm font-medium text-gray-700"
+              >Full Name</label
+            >
+            <input
+              type="text"
+              name="name"
+              id="name"
+              value="<%= user.name %>"
+              required
+              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+          </div>
+
+          <div class="col-span-6 sm:col-span-4">
+            <label
+              for="jiitPortalUsername"
+              class="block text-sm font-medium text-gray-700"
+              >JIIT Portal Username</label
+            >
+            <input
+              type="text"
+              name="jiitPortalUsername"
+              id="jiitPortalUsername"
+              value="<%= user.jiitPortalUsername %>"
+              required
+              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+          </div>
+
+          <div class="col-span-6 sm:col-span-4">
+            <label
+              for="jiitPortalPassword"
+              class="block text-sm font-medium text-gray-700"
+              >JIIT Portal Password</label
+            >
+            <input
+              type="password"
+              name="jiitPortalPassword"
+              id="jiitPortalPassword"
+              placeholder="Leave blank to keep current password"
+              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Your password is encrypted and securely stored. We need this to
+              verify attendance.
+            </p>
+          </div>
+        </div>
+        <div class="mt-6">
+          <button
+            type="submit"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Update Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password Form -->
+  <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Change Password
+      </h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        Update your account password.
+      </p>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+      <form action="/profile/change-password" method="POST">
+        <div class="grid grid-cols-6 gap-6">
+          <div class="col-span-6 sm:col-span-4">
+            <label
+              for="currentPassword"
+              class="block text-sm font-medium text-gray-700"
+              >Current Password</label
+            >
+            <input
+              type="password"
+              name="currentPassword"
+              id="currentPassword"
+              required
+              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+          </div>
+
+          <div class="col-span-6 sm:col-span-4">
+            <label
+              for="newPassword"
+              class="block text-sm font-medium text-gray-700"
+              >New Password</label
+            >
+            <input
+              type="password"
+              name="newPassword"
+              id="newPassword"
+              required
+              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+          </div>
+
+          <div class="col-span-6 sm:col-span-4">
+            <label
+              for="confirmPassword"
+              class="block text-sm font-medium text-gray-700"
+              >Confirm New Password</label
+            >
+            <input
+              type="password"
+              name="confirmPassword"
+              id="confirmPassword"
+              required
+              class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            />
+          </div>
+        </div>
+        <div class="mt-6">
+          <button
+            type="submit"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Change Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

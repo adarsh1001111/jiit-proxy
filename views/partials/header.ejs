@@ -1,0 +1,168 @@
+<header class="bg-white shadow">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center py-4">
+      <div class="flex items-center">
+        <a href="/" class="flex items-center">
+          <svg
+            class="w-8 h-8 text-blue-600"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zm-1-5a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zm0-3a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          <span class="ml-2 text-xl font-bold text-gray-800">JIIT Proxy</span>
+        </a>
+      </div>
+
+      <% if(user) { %>
+      <nav class="hidden md:flex space-x-6">
+        <a
+          href="/dashboard"
+          class="text-gray-600 hover:text-blue-600 transition duration-150"
+          >Dashboard</a
+        >
+        <a
+          href="/proxy/available"
+          class="text-gray-600 hover:text-blue-600 transition duration-150"
+          >Find Proxies</a
+        >
+        <a
+          href="/proxy/create"
+          class="text-gray-600 hover:text-blue-600 transition duration-150"
+          >Request Proxy</a
+        >
+        <a
+          href="/profile"
+          class="text-gray-600 hover:text-blue-600 transition duration-150"
+          >Profile</a
+        >
+      </nav>
+
+      <div class="flex items-center">
+        <div class="mr-4 hidden md:block">
+          <span class="text-sm text-gray-500">Balance:</span>
+          <span class="text-sm font-bold text-green-600"
+            >₹<%= user.walletBalance.toFixed(2) %></span
+          >
+        </div>
+
+        <div class="relative" x-data="{ open: false }">
+          <button
+            @click="open = !open"
+            class="flex items-center text-gray-700 focus:outline-none"
+          >
+            <span class="mr-2 hidden md:block"
+              ><%= user.name.split(' ')[0] %></span
+            >
+            <div
+              class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white"
+            >
+              <%= user.name.charAt(0) %>
+            </div>
+          </button>
+
+          <div
+            x-show="open"
+            @click.away="open = false"
+            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10"
+          >
+            <a
+              href="/profile"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >Your Profile</a
+            >
+            <a
+              href="/proxy/my-requests"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >My Proxy Requests</a
+            >
+            <a
+              href="/proxy/my-tasks"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >My Proxy Tasks</a
+            >
+            <a
+              href="/payment/transactions"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >Transaction History</a
+            >
+            <div class="border-t border-gray-100 my-1"></div>
+            <a
+              href="/auth/logout"
+              class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+              >Logout</a
+            >
+          </div>
+        </div>
+
+        <button class="ml-4 md:hidden" @click="mobileMenu = !mobileMenu">
+          <svg
+            class="w-6 h-6 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <% } else { %>
+      <div class="flex space-x-4">
+        <a
+          href="/auth/login"
+          class="text-blue-600 hover:text-blue-800 font-medium"
+          >Login</a
+        >
+        <a
+          href="/auth/register"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >Register</a
+        >
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="md:hidden" x-show="mobileMenu" @click.away="mobileMenu = false">
+    <div class="container mx-auto px-4 py-2 border-t border-gray-200">
+      <nav class="flex flex-col space-y-2">
+        <a
+          href="/dashboard"
+          class="text-gray-600 hover:text-blue-600 py-2 transition duration-150"
+          >Dashboard</a
+        >
+        <a
+          href="/proxy/available"
+          class="text-gray-600 hover:text-blue-600 py-2 transition duration-150"
+          >Find Proxies</a
+        >
+        <a
+          href="/proxy/create"
+          class="text-gray-600 hover:text-blue-600 py-2 transition duration-150"
+          >Request Proxy</a
+        >
+        <a
+          href="/profile"
+          class="text-gray-600 hover:text-blue-600 py-2 transition duration-150"
+          >Profile</a
+        >
+        <div class="border-t border-gray-200 my-1"></div>
+        <a
+          href="/auth/logout"
+          class="text-red-600 hover:text-red-800 py-2 transition duration-150"
+          >Logout</a
+        >
+      </nav>
+    </div>
+  </div>
+</header>
